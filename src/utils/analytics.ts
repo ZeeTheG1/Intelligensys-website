@@ -1,40 +1,46 @@
 import posthog from 'posthog-js';
+import { env } from './env';
 
 export const initPostHog = () => {
-  const apiKey = import.meta.env.VITE_POSTHOG_KEY;
-  const apiHost = import.meta.env.VITE_POSTHOG_HOST || 'https://app.posthog.com';
+  try {
+    const { apiKey, host } = env.posthog;
 
-  if (!apiKey) {
-    console.warn('PostHog API key not found. Analytics disabled.');
-    return;
+    if (!apiKey) {
+      console.warn('PostHog API key not found. Analytics disabled.');
+      return;
+    }
+
+    posthog.init(apiKey, {
+      api_host: host,
+      // Capture pageviews automatically
+      capture_pageview: true,
+      // Capture clicks automatically
+      autocapture: true,
+      // Session recording
+      session_recording: {
+        maskAllInputs: true,
+        maskAllText: false,
+      },
+      // Feature flags
+      bootstrap: {
+        featureFlags: {},
+      },
+      // Privacy settings
+      respect_dnt: true,
+      // Performance monitoring
+      capture_performance: true,
+      // Only load in production
+      loaded: (posthog) => {
+        if (env.isDev) {
+          posthog.debug();
+        }
+      },
+    });
+    
+    console.log('✅ PostHog initialized successfully');
+  } catch (error) {
+    console.warn('❌ Failed to initialize PostHog:', error);
   }
-
-  posthog.init(apiKey, {
-    api_host: apiHost,
-    // Capture pageviews automatically
-    capture_pageview: true,
-    // Capture clicks automatically
-    autocapture: true,
-    // Session recording
-    session_recording: {
-      maskAllInputs: true,
-      maskAllText: false,
-    },
-    // Feature flags
-    bootstrap: {
-      featureFlags: {},
-    },
-    // Privacy settings
-    respect_dnt: true,
-    // Performance monitoring
-    capture_performance: true,
-    // Only load in production
-    loaded: (posthog) => {
-      if (import.meta.env.DEV) {
-        posthog.debug();
-      }
-    },
-  });
 };
 
 // Analytics event helpers

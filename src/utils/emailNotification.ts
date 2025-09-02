@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { env } from './env';
 
 interface EmailNotificationData {
   name: string;
@@ -38,7 +39,7 @@ export const sendEmailNotification = async (formData: EmailNotificationData) => 
 
 // Alternative email service using a third-party API (Resend)
 export const sendEmailViaResend = async (formData: EmailNotificationData) => {
-  const resendApiKey = import.meta.env.VITE_RESEND_API_KEY;
+  const resendApiKey = env.email.resendApiKey;
   
   if (!resendApiKey) {
     console.warn('Resend API key not configured - email notification disabled');
