@@ -38,25 +38,31 @@ const Contact = () => {
         throw error;
       }
 
-      // Send email notification (try Supabase Edge Function first, fallback to Resend)
-      let emailResult = await sendEmailNotification({
-        ...messageData,
-        submissionId: insertData?.id
-      });
+      // Try to send email notification but don't fail if it doesn't work
+      try {
+        // Send email notification (try Supabase Edge Function first, fallback to Resend)
+        let emailResult = await sendEmailNotification({
+          ...messageData,
+          submissionId: insertData?.id
+        });
 
-      // If Supabase Edge Function fails, try Resend as fallback
-      if (!emailResult.success) {
-        console.log('Supabase email failed, trying Resend fallback...');
-        emailResult = await sendEmailViaResend(messageData);
-      }
+        // If Supabase Edge Function fails, try Resend as fallback
+        if (!emailResult.success) {
+          console.log('Supabase email failed, trying Resend fallback...');
+          emailResult = await sendEmailViaResend(messageData);
+        }
 
-      // Log email result but don't fail the form submission if email fails
-      if (emailResult.success) {
-        console.log('Email notification sent successfully');
-      } else {
-        console.warn('Failed to send email notification:', emailResult.error);
-        // Capture email failure for monitoring but don't show error to user
-        captureException(new Error(`Email notification failed: ${emailResult.error}`));
+        // Log email result but don't fail the form submission if email fails
+        if (emailResult.success) {
+          console.log('Email notification sent successfully');
+        } else {
+          console.warn('Failed to send email notification:', emailResult.error);
+          // Capture email failure for monitoring but don't show error to user
+          captureException(new Error(`Email notification failed: ${emailResult.error}`));
+        }
+      } catch (emailError) {
+        console.warn('Email service unavailable, but form submission successful:', emailError);
+        captureException(new Error(`Email service error: ${emailError.message}`));
       }
 
       // Track successful form submission
