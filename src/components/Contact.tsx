@@ -3,6 +3,7 @@ import { Mail, Phone, MapPin, Send } from 'lucide-react';
 import { supabase, type ContactMessage } from '../lib/supabase';
 import { trackContactFormSubmission, trackCTAClick } from '../utils/analytics';
 import { captureException } from '../utils/sentry';
+import { sendEmailNotification, sendEmailViaResend } from '../utils/emailNotification';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -27,12 +28,35 @@ const Contact = () => {
         message: formData.message,
       };
 
-      const { error } = await supabase
+      const { data: insertData, error } = await supabase
         .from('contact_messages')
-        .insert([messageData]);
+        .insert([messageData])
+        .select()
+        .single();
 
       if (error) {
         throw error;
+      }
+
+      // Send email notification (try Supabase Edge Function first, fallback to Resend)
+      let emailResult = await sendEmailNotification({
+        ...messageData,
+        submissionId: insertData?.id
+      });
+
+      // If Supabase Edge Function fails, try Resend as fallback
+      if (!emailResult.success) {
+        console.log('Supabase email failed, trying Resend fallback...');
+        emailResult = await sendEmailViaResend(messageData);
+      }
+
+      // Log email result but don't fail the form submission if email fails
+      if (emailResult.success) {
+        console.log('Email notification sent successfully');
+      } else {
+        console.warn('Failed to send email notification:', emailResult.error);
+        // Capture email failure for monitoring but don't show error to user
+        captureException(new Error(`Email notification failed: ${emailResult.error}`));
       }
 
       // Track successful form submission
@@ -40,7 +64,8 @@ const Contact = () => {
         name: formData.name,
         email: formData.email,
         company: formData.company,
-        source: 'contact_page'
+        source: 'contact_page',
+        emailSent: emailResult.success
       });
 
       setSubmitStatus('success');
