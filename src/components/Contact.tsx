@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
 import { supabase, type ContactMessage } from '../lib/supabase';
+import { trackContactFormSubmission, trackCTAClick } from '../utils/analytics';
+import { captureException } from '../utils/sentry';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -33,10 +35,19 @@ const Contact = () => {
         throw error;
       }
 
+      // Track successful form submission
+      trackContactFormSubmission({
+        name: formData.name,
+        email: formData.email,
+        company: formData.company,
+        source: 'contact_page'
+      });
+
       setSubmitStatus('success');
       setFormData({ name: '', email: '', company: '', message: '' });
     } catch (error) {
       console.error('Error submitting form:', error);
+      captureException(error as Error);
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
