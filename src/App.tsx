@@ -13,9 +13,18 @@ import Contact from './components/Contact';
 import { initSentry } from './utils/sentry';
 import { initPostHog, trackPageView, trackNavigation } from './utils/analytics';
 
-// Initialize error tracking and analytics
-initSentry();
-initPostHog();
+// Initialize error tracking and analytics safely
+try {
+  initSentry();
+} catch (error) {
+  console.warn('Failed to initialize Sentry:', error);
+}
+
+try {
+  initPostHog();
+} catch (error) {
+  console.warn('Failed to initialize PostHog:', error);
+}
 
 // Analytics wrapper component to track route changes
 const AnalyticsWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -23,13 +32,17 @@ const AnalyticsWrapper: React.FC<{ children: React.ReactNode }> = ({ children })
   const [prevLocation, setPrevLocation] = React.useState(location.pathname);
 
   useEffect(() => {
-    // Track page views
-    trackPageView();
-    
-    // Track navigation between pages
-    if (prevLocation !== location.pathname) {
-      trackNavigation(prevLocation, location.pathname);
-      setPrevLocation(location.pathname);
+    try {
+      // Track page views
+      trackPageView();
+      
+      // Track navigation between pages
+      if (prevLocation !== location.pathname) {
+        trackNavigation(prevLocation, location.pathname);
+        setPrevLocation(location.pathname);
+      }
+    } catch (error) {
+      console.warn('Analytics tracking error:', error);
     }
   }, [location, prevLocation]);
 

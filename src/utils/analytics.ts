@@ -39,16 +39,24 @@ export const initPostHog = () => {
 
 // Analytics event helpers
 export const trackEvent = (event: string, properties?: Record<string, any>) => {
-  if (typeof posthog !== 'undefined') {
-    posthog.capture(event, properties);
+  try {
+    if (typeof posthog !== 'undefined' && posthog.capture) {
+      posthog.capture(event, properties);
+    }
+  } catch (error) {
+    console.warn('PostHog tracking error:', error);
   }
 };
 
 export const trackPageView = (page?: string) => {
-  if (typeof posthog !== 'undefined') {
-    posthog.capture('$pageview', {
-      $current_url: page || window.location.href,
-    });
+  try {
+    if (typeof posthog !== 'undefined' && posthog.capture) {
+      posthog.capture('$pageview', {
+        $current_url: page || window.location.href,
+      });
+    }
+  } catch (error) {
+    console.warn('PostHog pageview tracking error:', error);
   }
 };
 
