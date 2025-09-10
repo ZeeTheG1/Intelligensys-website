@@ -1,3 +1,111 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Hero Section Typography - NEW CLASSES ONLY */
+.hero-headline {
+  font-family: 'Inter', sans-serif;
+  font-weight: 800;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: #1a1a1a;
+  margin-bottom: 1.5rem;
+}
+
+.hero-headline .highlight {
+  color: #3b82f6;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-subheadline {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: clamp(1.125rem, 3vw, 1.5rem);
+  line-height: 1.4;
+  color: #4a5568;
+  margin-bottom: 2rem;
+  max-width: 600px;
+}
+
+.hero-benefits {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: #2d3748;
+  margin-bottom: 2.5rem;
+  list-style: none;
+  padding: 0;
+}
+
+.hero-benefits li {
+  position: relative;
+  padding-left: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.hero-benefits li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: #10b981;
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.cta-primary {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 1.125rem;
+  line-height: 1.2;
+  letter-spacing: 0.025em;
+  color: #ffffff;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border: none;
+  border-radius: 8px;
+  padding: 16px 32px;
+  margin-right: 1rem;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cta-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+}
+
+.cta-secondary {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 1.125rem;
+  color: #3b82f6;
+  background: transparent;
+  border: 2px solid #3b82f6;
+  border-radius: 8px;
+  padding: 14px 32px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cta-secondary:hover {
+  background: #3b82f6;
+  color: #ffffff;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .cta-primary,
+  .cta-secondary {
+    font-size: 1rem;
+    padding: 12px 24px;
+    display: block;
+    width: 100%;
+    margin-bottom: 1rem;
+    margin-right: 0;
+  }
+}
